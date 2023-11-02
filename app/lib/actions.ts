@@ -1,5 +1,6 @@
 'use server';
 
+import { signIn } from "@/auth";
 import { z } from 'zod';
 import { sql } from "@vercel/postgres";
 import { revalidatePath } from 'next/cache';
@@ -102,7 +103,7 @@ export async function updateInvoice(prevState: State, formData: FormData) {
 }
 
 export async function deleteInvoice(formData: FormData) {
-    throw new Error('Failed to Delete Invoice - Fake Error')
+    // throw new Error('Failed to Delete Invoice - Fake Error')
     const id = formData.get('id')?.toString();
     try {
         await sql`
@@ -122,3 +123,19 @@ export async function deleteInvoice(formData: FormData) {
 
     }
 }
+
+export async function authenticate(
+    prevState: string | undefined,
+    formData: FormData,
+) {
+    try {
+        await signIn('credentials', Object.fromEntries(formData));
+    } catch (error) {
+        if ((error as Error).message.includes('CredentialsSignin')) {
+            return 'CredentialSignin'
+        }
+        throw error;
+
+    }
+}
+
